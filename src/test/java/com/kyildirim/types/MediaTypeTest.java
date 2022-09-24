@@ -20,7 +20,7 @@ class MediaTypeTest {
         try {
             tmp = File.createTempFile("test", ".mp4");
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Cannot create tmp file\n{}", e);
+            log.log(Level.SEVERE, "Cannot create tmp file\n{0}", e);
         }
         assertDoesNotThrow(() -> MediaType.MP4.checkFileType(tmp));
     }
@@ -29,7 +29,7 @@ class MediaTypeTest {
         try {
             tmp = File.createTempFile("test", ".flv");
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Cannot create tmp file\n{}", e);
+            log.log(Level.SEVERE, "Cannot create tmp file\n{0}", e);
         }
         assertThrows(IllegalStateException.class, () -> MediaType.MP4.checkFileType(tmp));
     }
@@ -39,7 +39,7 @@ class MediaTypeTest {
         try {
             tmp = File.createTempFile("test", "test");
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Cannot create tmp file\n{}", e);
+            log.log(Level.SEVERE, "Cannot create tmp file\n{0}", e);
         }
         assertThrows(IllegalArgumentException.class, () -> MediaType.MP4.checkFileType(tmp));
     }
