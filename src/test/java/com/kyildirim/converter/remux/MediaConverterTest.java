@@ -1,4 +1,4 @@
-package com.kyildirim.converter.transmuxing;
+package com.kyildirim.converter.remux;
 
 import org.junit.jupiter.api.Test;
 

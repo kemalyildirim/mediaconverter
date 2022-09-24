@@ -3,7 +3,7 @@ package com.kyildirim;
 import java.io.File;
 import java.util.logging.Level;
 
-import com.kyildirim.converter.transmuxing.MediaConverter;
+import com.kyildirim.converter.remux.MediaConverter;
 import com.kyildirim.types.MediaType;
 
 import lombok.extern.java.Log;
