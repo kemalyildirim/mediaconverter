@@ -18,14 +18,18 @@ public enum MediaType implements FileType {
     }
 
     public void checkFileType(File f) {
-        int exStart = f.getName().lastIndexOf(".");
-        if (exStart == -1) {
-            throw new IllegalArgumentException("No file extension for file:" + f.getName());
-        }
-        String fileExt = f.getName().substring(exStart + 1).toLowerCase();
+        String fileExt = getExtensionString(f);
         boolean matches = this.extension.equalsIgnoreCase(fileExt);
         if (!matches) {
             throw new IllegalStateException("Input file is " + fileExt + " not " + this.extension);
         }
+    }
+
+    public String getExtensionString(File f) {
+        int exStart = f.getName().lastIndexOf(".");
+        if (exStart == -1) {
+            throw new IllegalArgumentException("No file extension for file:" + f.getName());
+        }
+        return f.getName().substring(exStart + 1).toLowerCase();
     }
 }

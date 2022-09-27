@@ -1,8 +1,5 @@
 package com.kyildirim.types;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -10,6 +7,10 @@ import java.util.logging.Level;
 import org.junit.jupiter.api.Test;
 
 import lombok.extern.java.Log;
+
+import javax.print.attribute.standard.Media;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Log
 class MediaTypeTest {
@@ -42,5 +43,11 @@ class MediaTypeTest {
             log.log(Level.SEVERE, "Cannot create tmp file\n{0}", e);
         }
         assertThrows(IllegalArgumentException.class, () -> MediaType.MP4.checkFileType(tmp));
+    }
+
+    @Test
+    void getExtensionString() {
+        String input = "myFile.mp4";
+        assertEquals("mp4", MediaType.MP4.getExtensionString(new File(input)), "Cannot get file extension correctly.");
     }
 }
