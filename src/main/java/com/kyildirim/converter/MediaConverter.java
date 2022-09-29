@@ -10,14 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import org.bytedeco.javacpp.*;
-import org.bytedeco.ffmpeg.avcodec.*;
-import org.bytedeco.ffmpeg.avformat.*;
-import org.bytedeco.ffmpeg.avutil.*;
-import static org.bytedeco.ffmpeg.global.avcodec.*;
-import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.*;
-
 @RequiredArgsConstructor
 @Log4j2
 public class MediaConverter {
