@@ -23,6 +23,5 @@ public class Main {
         MediaConverter mCon = new MediaConverter(MediaType.FLV, MediaType.MP4);
         mCon.setIn(in);
         mCon.convert();
-        log.info("{} is converted to mp4 and saved to: {}", in.getAbsolutePath(), mCon.getOut().getAbsolutePath());
     }
 }

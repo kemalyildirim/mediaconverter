@@ -3,6 +3,7 @@ package com.kyildirim.converter;
 import java.io.File;
 
 import com.kyildirim.converter.remux.Remuxer;
+import com.kyildirim.converter.remux.exception.UnsupportedCodecException;
 import com.kyildirim.types.MediaType;
 
 import lombok.Getter;
@@ -25,7 +26,12 @@ public class MediaConverter {
         inType.checkFileType(in);
         out = new File(createOutputFile("mp4"));
         Remuxer remuxer = new Remuxer(in, out);
-        remuxer.remux();
+        try {
+            remuxer.remux();
+            log.info("{} is converted to mp4 and saved to: {}", in.getAbsolutePath(), out.getAbsolutePath());
+        } catch (UnsupportedCodecException e) {
+            log.error("Remuxing failed.", e);
+        }
     }
 
     private String createOutputFile(String newExtension) {
