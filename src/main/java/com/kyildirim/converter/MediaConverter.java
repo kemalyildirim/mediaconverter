@@ -24,7 +24,7 @@ public class MediaConverter {
         log.trace("convert() called.");
         log.trace("from type {} to type {} the file {}", inType, oType, in.getAbsolutePath());
         inType.checkFileType(in);
-        out = new File(createOutputFile("mp4"));
+        out = new File(createOutputFile(oType.getExtension()));
         Remuxer remuxer = new Remuxer(in, out);
         try {
             remuxer.remux();
