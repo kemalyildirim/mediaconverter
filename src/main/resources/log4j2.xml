@@ -5,7 +5,7 @@
             </Console>
     </Appenders>
     <Loggers>
-        <Root level="trace">
+        <Root level="${env:LOG_LEVEL:-INFO}">
             <AppenderRef ref="Out"/>
         </Root>
     </Loggers>
