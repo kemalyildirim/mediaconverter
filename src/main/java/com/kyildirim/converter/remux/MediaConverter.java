@@ -1,24 +1,26 @@
 package com.kyildirim.converter.remux;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import com.kyildirim.types.MediaType;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.java.Log;
-import org.bytedeco.javacpp.PointerPointer;
-import org.bytedeco.javacpp.avcodec;
-import org.bytedeco.javacpp.avformat;
-import org.bytedeco.javacpp.avutil;
+import lombok.extern.log4j.Log4j2;
 
-import static org.bytedeco.javacpp.avformat.*;
-import static org.bytedeco.javacpp.avutil.*;
+import org.bytedeco.javacpp.*;
+import org.bytedeco.ffmpeg.avcodec.*;
+import org.bytedeco.ffmpeg.avformat.*;
+import org.bytedeco.ffmpeg.avutil.*;
+import org.bytedeco.ffmpeg.swscale.*;
+import static org.bytedeco.ffmpeg.global.avcodec.*;
+import static org.bytedeco.ffmpeg.global.avformat.*;
+import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.ffmpeg.global.swscale.*;
 
 @RequiredArgsConstructor
-@Log
+@Log4j2
 public class MediaConverter {
 
     final MediaType inType;
@@ -28,21 +30,21 @@ public class MediaConverter {
 
     public void convert() {
         inType.checkFileType(in);
+        out = new File(createOutputFile("mp4"));
         String inAbsolute = in.getAbsolutePath();
-        String outAbsolute = createOutputFile("mp4");
-        avformat.AVOutputFormat ofmt = null;
-        avformat.AVFormatContext ifmt_ctx = new avformat.AVFormatContext(null);
-        avformat.AVFormatContext ofmt_ctx = new avformat.AVFormatContext(null);
-        avcodec.AVPacket pkt = new avcodec.AVPacket();
+        String outAbsolute = out.getAbsolutePath();
+        AVOutputFormat ofmt = null;
+        AVFormatContext ifmt_ctx = new AVFormatContext(null);
+        AVFormatContext ofmt_ctx = new AVFormatContext(null);
+        AVPacket pkt = new AVPacket();
         int ret;
-        int i;
         int[] stream_mapping;
         int stream_index = 0;
         int stream_mapping_size = 0;
-        avformat.AVInputFormat avInputFormat = new avformat.AVInputFormat(null);
-        avutil.AVDictionary avDictionary = new avutil.AVDictionary(null);
+        AVInputFormat avInputFormat = new AVInputFormat(null);
+        AVDictionary avDictionary = new AVDictionary(null);
         if ((ret = avformat_open_input(ifmt_ctx, inAbsolute, avInputFormat, avDictionary)) < 0) {
-            log.log(Level.SEVERE, "Could not open input file {0}", inAbsolute);
+            log.error("Could not open input file {}", inAbsolute);
         }
         av_dict_free(avDictionary);
 
@@ -64,7 +66,7 @@ public class MediaConverter {
             AVStream out_stream;
             AVStream in_stream = ifmt_ctx.streams(stream_idx);
 
-            avcodec.AVCodecParameters in_codedpar = in_stream.codecpar();
+            AVCodecParameters in_codedpar = in_stream.codecpar();
 
             if (in_codedpar.codec_type() != AVMEDIA_TYPE_AUDIO &&
                     in_codedpar.codec_type() != AVMEDIA_TYPE_VIDEO &&
@@ -77,9 +79,9 @@ public class MediaConverter {
 
             out_stream = avformat_new_stream(ofmt_ctx, null);
 
-            ret = avcodec.avcodec_parameters_copy(out_stream.codecpar(), in_codedpar);
+            ret = avcodec_parameters_copy(out_stream.codecpar(), in_codedpar);
             if (ret < 0) {
-                log.severe("Failed to copy codec parameters");
+                log.error("Failed to copy codec parameters");
             }
             out_stream.codecpar().codec_tag(0);
         }
@@ -96,7 +98,7 @@ public class MediaConverter {
         AVDictionary avOutDict = new AVDictionary(null);
         ret = avformat_write_header(ofmt_ctx, avOutDict);
         if (ret < 0) {
-            log.severe("Error occurred when opening output file");
+            log.error("Error occurred when opening output file");
         }
         while (true) {
             AVStream in_stream, out_stream;
@@ -108,7 +110,7 @@ public class MediaConverter {
             in_stream = ifmt_ctx.streams(pkt.stream_index());
             if (pkt.stream_index() >= stream_mapping_size ||
                     stream_mapping[pkt.stream_index()] < 0) {
-                avcodec.av_packet_unref(pkt);
+                av_packet_unref(pkt);
                 continue;
             }
 
@@ -130,7 +132,7 @@ public class MediaConverter {
                 }
             }
 
-            avcodec.av_packet_unref(pkt);
+            av_packet_unref(pkt);
 
         }
         av_write_trailer(ofmt_ctx);

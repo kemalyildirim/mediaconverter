@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import lombok.extern.java.Log;
 
-import javax.print.attribute.standard.Media;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @Log
