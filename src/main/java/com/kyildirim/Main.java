@@ -15,6 +15,7 @@ public class Main {
             System.exit(-1);
         }
         File in = new File(args[0]);
+        log.debug("Input file is {}", in::getAbsolutePath);
         if (!in.isFile() || !in.canRead()) {
             log.error("Cannot read the input file. Check the file permissions and the file path.");
             System.exit(-1);

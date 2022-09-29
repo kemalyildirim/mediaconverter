@@ -27,6 +27,7 @@ public class MediaConverter {
     @Getter File out;
 
     public void convert() {
+        log.trace("convert() called.");
         inType.checkFileType(in);
         out = new File(createOutputFile("mp4"));
         String inAbsolute = in.getAbsolutePath();
@@ -41,18 +42,19 @@ public class MediaConverter {
         int stream_mapping_size = 0;
         AVInputFormat avInputFormat = new AVInputFormat(null);
         AVDictionary avDictionary = new AVDictionary(null);
-        if ((ret = avformat_open_input(ifmt_ctx, inAbsolute, avInputFormat, avDictionary)) < 0) {
+        if (avformat_open_input(ifmt_ctx, inAbsolute, avInputFormat, avDictionary) < 0) {
             log.error("Could not open input file {}", inAbsolute);
+            return;
         }
         av_dict_free(avDictionary);
 
-        // Read packets of a media file to get stream information
-        if ((ret = avformat_find_stream_info(ifmt_ctx, (PointerPointer) null)) < 0) {
+        if (avformat_find_stream_info(ifmt_ctx, (PointerPointer) null) < 0) {
             throw new IllegalStateException("avformat_find_stream_info() error:\tFailed to retrieve input stream information");
         }
+        // TODO: Why its printing to stderr?
         av_dump_format(ifmt_ctx, 0, inAbsolute, 0);
 
-        if ((ret = avformat_alloc_output_context2(ofmt_ctx, null, null, outAbsolute)) < 0) {
+        if (avformat_alloc_output_context2(ofmt_ctx, null, null, outAbsolute) < 0) {
             throw new IllegalStateException("avformat_alloc_output_context2() error:\tCould not create output context\n");
         }
         stream_mapping_size = ifmt_ctx.nb_streams();
@@ -79,7 +81,7 @@ public class MediaConverter {
 
             ret = avcodec_parameters_copy(out_stream.codecpar(), in_codedpar);
             if (ret < 0) {
-                log.error("Failed to copy codec parameters");
+                throw new IllegalStateException("Failed to copy codec parameters");
             }
             out_stream.codecpar().codec_tag(0);
         }
@@ -99,9 +101,10 @@ public class MediaConverter {
             log.error("Error occurred when opening output file");
         }
         while (true) {
-            AVStream in_stream, out_stream;
+            AVStream in_stream;
+            AVStream out_stream;
             // Return the next frame of a stream.
-            if ((ret = av_read_frame(ifmt_ctx, pkt)) < 0) {
+            if (av_read_frame(ifmt_ctx, pkt) < 0) {
                 break;
             }
 
@@ -151,7 +154,7 @@ public class MediaConverter {
     }
 
     public void save() {
-        log.info("Save called.");
+        log.trace("Save called.");
     }
 
 }
