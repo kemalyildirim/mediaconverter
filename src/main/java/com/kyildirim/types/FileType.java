@@ -1,5 +1,5 @@
 package com.kyildirim.types;
 
-public interface FileType {
+public  interface FileType {
     String getExtension();
 }
