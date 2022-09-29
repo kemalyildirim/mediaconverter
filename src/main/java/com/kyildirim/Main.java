@@ -10,13 +10,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Main {
     public static void main(String[] args) {
-//        if (args.length < 1) {
-//            log.warning("Missing arguments. Usage\nmediaconverter <in>");
-//            System.exit(-1);
-//        }
-//        File in = new File(args[0]);
-        // File in = new File("D:\\github\\mediaconverter\\test_videos\\out.flv");
-        File in = new File("test_videos/test_sample.flv");
+        if (args.length < 1) {
+            log.warn("Missing arguments. Usage\nmediaconverter <in>");
+            System.exit(-1);
+        }
+        File in = new File(args[0]);
         if (!in.isFile() || !in.canRead()) {
             log.error("Cannot read the input file. Check the file permissions and the file path.");
             System.exit(-1);
