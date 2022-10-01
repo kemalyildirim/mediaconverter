@@ -17,13 +17,13 @@ public class Main {
         }
         String extension = f.getName().substring(exStart + 1).toLowerCase();
         if (extension.equalsIgnoreCase("flv"))
-                return MediaType.FLV;
+            return MediaType.FLV;
         else // assuming there are only flv and mp4 types.
-                return MediaType.MP4;
+            return MediaType.MP4;
     }
     public static void main(String[] args) {
         if (args.length < 1) {
-            log.warn("Missing arguments. Provide input flv file.\nexample: java -jar mediaconverter.jar myfile.flv");
+            log.warn("Missing input argument.\nexample: java -jar mediaconverter.jar myfile.flv");
             System.exit(-1);
         }
         File in = new File(args[0]);
@@ -35,10 +35,8 @@ public class Main {
         MediaConverter mCon;
         MediaType inType = createInputMediaType(in);
         if (inType.equals(MediaType.FLV)) {
-            log.trace("from flv to mp4");
             mCon = new MediaConverter(MediaType.FLV, MediaType.MP4);
         } else { // assuming there are only flv and mp4 types.
-            log.trace("from mp4 to flv");
             mCon = new MediaConverter(MediaType.MP4, MediaType.FLV);
         }
         mCon.setIn(in);

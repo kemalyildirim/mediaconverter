@@ -22,19 +22,19 @@ public class MediaConverter {
 
     public void convert() {
         log.trace("convert() called.");
-        log.trace("from type {} to type {} output to the file {}", inType, outType, in.getAbsolutePath());
         inType.checkFileType(in);
-        out = new File(createOutputFile(outType.getExtension()));
+        out = new File(createOutputFilename(outType.getExtension()));
+        log.debug("Converting the file {} from {} to {} and saving converted file at {}", in, inType, outType, out.getAbsolutePath());
         Remuxer remuxer = new Remuxer(this);
         try {
             remuxer.remux();
-            log.info("{} is converted to mp4 and saved to: {}", in.getAbsolutePath(), out.getAbsolutePath());
+            log.info("{} is converted to {} and saved at: {}", in.getAbsolutePath(), outType, out.getAbsolutePath());
         } catch (UnsupportedCodecException e) {
             log.error("Remuxing failed.", e);
         }
     }
 
-    private String createOutputFile(String newExtension) {
+    private String createOutputFilename(String newExtension) {
         String inExtension = inType.getExtensionString(in);
         return in.getAbsolutePath().replace(inExtension, newExtension);
     }
