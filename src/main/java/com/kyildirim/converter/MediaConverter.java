@@ -16,15 +16,15 @@ import lombok.extern.log4j.Log4j2;
 public class MediaConverter {
 
     private final MediaType inType;
-    private final MediaType oType;
+    private final MediaType outType;
     @Setter private File in;
     @Getter private File out;
 
     public void convert() {
         log.trace("convert() called.");
-        log.trace("from type {} to type {} output to the file {}", inType, oType, in.getAbsolutePath());
+        log.trace("from type {} to type {} output to the file {}", inType, outType, in.getAbsolutePath());
         inType.checkFileType(in);
-        out = new File(createOutputFile(oType.getExtension()));
+        out = new File(createOutputFile(outType.getExtension()));
         Remuxer remuxer = new Remuxer(in, out);
         try {
             remuxer.remux();
