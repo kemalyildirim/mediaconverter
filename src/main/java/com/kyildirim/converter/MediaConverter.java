@@ -22,7 +22,7 @@ public class MediaConverter {
 
     public void convert() {
         log.trace("convert() called.");
-        log.trace("from type {} to type {} the file {}", inType, oType, in.getAbsolutePath());
+        log.trace("from type {} to type {} output to the file {}", inType, oType, in.getAbsolutePath());
         inType.checkFileType(in);
         out = new File(createOutputFile("mp4"));
         Remuxer remuxer = new Remuxer(in, out);
