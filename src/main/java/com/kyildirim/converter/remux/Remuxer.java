@@ -25,7 +25,7 @@ public class Remuxer {
     private MediaConverter mediaConverter;
 
     //src: https://github.com/ant-media/Ant-Media-Server/blob/master/src/main/java/io/antmedia/muxer/Mp4Muxer.java#L77
-    private static int[] MP4_SUPPORTED_CODECS = {
+    private static final int[] MP4_SUPPORTED_CODECS = {
             AV_CODEC_ID_MOV_TEXT     ,
             AV_CODEC_ID_MPEG4        ,
             AV_CODEC_ID_H264         ,
@@ -62,7 +62,7 @@ public class Remuxer {
     };
 
     // src: https://trac.ffmpeg.org/wiki/SupportedMediaTypesInFormats
-    private static int[] FLV_SUPPORTED_CODECS = {
+    private static final int[] FLV_SUPPORTED_CODECS = {
             // video
             AV_CODEC_ID_FLV1,
             AV_CODEC_ID_H263,
