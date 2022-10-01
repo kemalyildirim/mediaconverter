@@ -15,17 +15,17 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MediaConverter {
 
-    private final MediaType inType;
-    private final MediaType outType;
-    @Setter private File in;
-    @Getter private File out;
+    @Getter private final MediaType inType;
+    @Getter private final MediaType outType;
+    @Setter @Getter private File in;
+    @Setter @Getter private File out;
 
     public void convert() {
         log.trace("convert() called.");
         log.trace("from type {} to type {} output to the file {}", inType, outType, in.getAbsolutePath());
         inType.checkFileType(in);
         out = new File(createOutputFile(outType.getExtension()));
-        Remuxer remuxer = new Remuxer(in, out);
+        Remuxer remuxer = new Remuxer(this);
         try {
             remuxer.remux();
             log.info("{} is converted to mp4 and saved to: {}", in.getAbsolutePath(), out.getAbsolutePath());

@@ -1,6 +1,8 @@
 package com.kyildirim.converter.remux;
 
+import com.kyildirim.converter.MediaConverter;
 import com.kyildirim.converter.remux.exception.UnsupportedCodecException;
+import com.kyildirim.types.MediaType;
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.*;
@@ -13,20 +15,14 @@ import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
-import java.io.File;
 import java.util.Arrays;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class Remuxer {
 
-    @Setter
-    private File in;
-    @Getter
-    private File out;
+    private MediaConverter mediaConverter;
 
     //src: https://github.com/ant-media/Ant-Media-Server/blob/master/src/main/java/io/antmedia/muxer/Mp4Muxer.java#L77
     private static int[] MP4_SUPPORTED_CODECS = {
@@ -91,14 +87,13 @@ public class Remuxer {
     private AVFormatContext outputFormatContext = new AVFormatContext(null);
     private AVDictionary inputDict = new AVDictionary(null);
 
-    public Remuxer(File in, File out) {
-        this.in = in;
-        this.out = out;
+    public Remuxer(MediaConverter mediaConverter) {
+        this.mediaConverter = mediaConverter;
     }
 
     private void openMediaFile() {
-        if (avformat_open_input(inputFormatContext, in.getAbsolutePath(), inputFormat, inputDict) < 0) {
-            log.error("Could not open input file {}", in.getAbsolutePath());
+        if (avformat_open_input(inputFormatContext, this.mediaConverter.getIn().getAbsolutePath(), inputFormat, inputDict) < 0) {
+            log.error("Could not open input file {}", this.mediaConverter.getIn().getAbsolutePath());
             return;
         }
         av_dict_free(inputDict);
@@ -115,12 +110,12 @@ public class Remuxer {
             throw new IllegalStateException("avformat_find_stream_info() error:\tFailed to retrieve input stream information");
         }
         // TODO: Why its printing to stderr?
-        av_dump_format(inputFormatContext, 0, in.getAbsolutePath(), 0);
+        av_dump_format(inputFormatContext, 0, this.mediaConverter.getIn().getAbsolutePath(), 0);
         streamMappingSize = inputFormatContext.nb_streams();
         streamMapping = new int[streamMappingSize];
 
         // TODO: Can get the format name from MediaType enum and give it in here.
-        if (avformat_alloc_output_context2(outputFormatContext, null, null, out.getAbsolutePath()) < 0) {
+        if (avformat_alloc_output_context2(outputFormatContext, null, null, this.mediaConverter.getOut().getAbsolutePath()) < 0) {
             throw new IllegalStateException("avformat_alloc_output_context2() error:\tCould not create output context\n");
         }
         outputFormat = outputFormatContext.oformat();
@@ -151,18 +146,18 @@ public class Remuxer {
             outStream.codecpar().codec_tag(0);
         }
         // TODO: Why its printing to stderr?
-        av_dump_format(outputFormatContext, 0, out.getAbsolutePath(), 1);
+        av_dump_format(outputFormatContext, 0, this.mediaConverter.getOut().getAbsolutePath(), 1);
 
         if ((outputFormat.flags() & AVFMT_NOFILE) == 0) {
             AVIOContext pb = new AVIOContext(null);
-            if (avio_open(pb, out.getAbsolutePath(), AVIO_FLAG_WRITE) < 0) {
-                throw new IllegalStateException("avio_open() error:\tCould not open output file " + out.getAbsolutePath());
+            if (avio_open(pb, this.mediaConverter.getOut().getAbsolutePath(), AVIO_FLAG_WRITE) < 0) {
+                throw new IllegalStateException("avio_open() error:\tCould not open output file " + this.mediaConverter.getOut().getAbsolutePath());
             }
             outputFormatContext.pb(pb);
         }
         AVDictionary outputDict = new AVDictionary(null);
         if (avformat_write_header(outputFormatContext, outputDict) < 0) {
-            log.error("Error occurred while avformat_write_header() for output file {}", out.getAbsolutePath());
+            log.error("Error occurred while avformat_write_header() for output file {}", this.mediaConverter.getOut().getAbsolutePath());
         }
         // "packet" is the next frame of a stream.
         while (av_read_frame(inputFormatContext, packet) >= 0) { // while end of file is reached
@@ -194,7 +189,7 @@ public class Remuxer {
             av_packet_unref(packet);
         }
         if (av_write_trailer(outputFormatContext) < 0) {
-            throw new IllegalStateException("Cannot write to: " + out.getAbsolutePath());
+            throw new IllegalStateException("Cannot write to: " + this.mediaConverter.getOut().getAbsolutePath());
         }
         avformat_close_input(inputFormatContext);
 
@@ -205,8 +200,9 @@ public class Remuxer {
         avformat_free_context(outputFormatContext);
     }
 
-    private static void checkCodecCompatibility(AVCodecParameters inputCodecParams) throws UnsupportedCodecException {
-        if (Arrays.stream(MP4_SUPPORTED_CODECS).noneMatch(codecId -> codecId == inputCodecParams.codec_id())) {
+    private void checkCodecCompatibility(AVCodecParameters inputCodecParams) throws UnsupportedCodecException {
+        var checkArray = this.mediaConverter.getInType() == MediaType.FLV ? MP4_SUPPORTED_CODECS : FLV_SUPPORTED_CODECS;
+        if (Arrays.stream(checkArray).noneMatch(codecId -> codecId == inputCodecParams.codec_id())) {
             throw new UnsupportedCodecException("Cannot re-mux the stream with codec " + avcodec.avcodec_get_name(inputCodecParams.codec_id()).getString());
         }
     }
